@@ -20,9 +20,26 @@ public class SearchController {
     }
 
 
-    @RequestMapping(value="/search")
+   @RequestMapping(value="/search")
     @ResponseBody
     public Object search(@RequestParam("q") String q) {
-        return producerTemplate.requestBodyAndHeader("direct:search", "", "CamelTwitterKeywords", q);
+        HashMap<String,Object> head = new HashMap<String, Object>();
+        String keywords = "";
+        Integer count = 0;
+        Scanner s = new Scanner(q);
+        s.useDelimiter(" ");
+        while (s.hasNext()){
+            String aux = s.next();
+            if(aux.contains("max:")){
+                String []aux2 = aux.split(":");
+                count = new Integer(aux2[1]);
+            }else{
+                keywords = keywords + " " + aux;
+            }
+        }
+        head.put("CamelTwitterKeywords",keywords);
+        head.put("CamelTwitterCount",count);
+
+        return producerTemplate.requestBodyAndHeaders("direct:search","",head);
     }
 }
